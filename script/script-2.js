@@ -12,7 +12,7 @@
   * value = item_value
   */
 
-let storage = {
+ let storage = {
   income_items: [],
   expanses_itsems: []
 }
@@ -43,8 +43,6 @@ table.addEventListener('click', (e) => {
   if (e.target.dataset.class == "remove"){
     const id = e.target.closest(".item").dataset.id;
     delete_budgetItem(id);
-    totalIncome = sumByBudgetItem(storage.income_items);
-    totalExpanses = sumByBudgetItem(storage.expanses_itsems);
     id[0] == 'i' ? budgetResult('+') :  budgetResult('-');
   }
 });
@@ -112,11 +110,9 @@ const add_new_budgetItem = (description, value) => {
 
   if(!cash_flow){
     storage.income_items.push(new_budgetItem);
-    totalIncome = sumByBudgetItem(storage.income_items);
     budgetResult('+');
   } else {
     storage.expanses_itsems.push(new_budgetItem);
-    totalExpanses = sumByBudgetItem(storage.expanses_itsems);
     budgetResult('-');
   }
 
@@ -143,13 +139,8 @@ const add_new_item_template = item => {
  */
 const create_budgetItem_template = item => {
   let sign = '';
-
-  if(!cash_flow){
-    sign += "+";
-  }else{
-    sign += "-";
-  }
-
+  !cash_flow ? sign = "+" : sign = "-";
+ 
   return `
         <div class="item clearfix" data-id="${item.id}">
           <div class="item_description">${item.description}</div>
@@ -206,11 +197,16 @@ const delete_item_HTML = id => {
 const sumByBudgetItem = (arr) => {
   let sum = 0;
   if(!!arr.length){
-    for (let i = 0; i < arr.length; i++) {
-      sum += +arr[i].value;
-    }
-  }
-
+    sum += arr.reduce(function(baseValue, curent){
+      return baseValue + Number(curent.value);
+    },0);
+  } 
+  // 
+  //   for (let i = 0; i < arr.length; i++) {
+  //     sum += +arr[i].value;
+  //   }
+  // }
+  // мой вариант короче
   return sum;
 }
 
@@ -220,6 +216,8 @@ const sumByBudgetItem = (arr) => {
  * @param {Text} budgetOperation - параметр определяющий расход или доход
  */
 let budgetResult = (budgetOperation) => {
+  totalIncome = sumByBudgetItem(storage.income_items);
+  totalExpanses = sumByBudgetItem(storage.expanses_itsems);
   budgetOperation == '+' ? document.querySelector('.budget_income--value').textContent = `+ ${Math.round(totalIncome*100)/100}`:
                           document.querySelector('.budget_expenses--value').textContent = `- ${Math.round(totalExpanses*100)/100}`;
   let res = totalIncome - totalExpanses;
